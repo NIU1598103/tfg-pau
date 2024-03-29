@@ -61,6 +61,7 @@ Route::middleware([
     Route::resource('days', DayController::class);
     Route::resource('months', MonthController::class);
     Route::get('/months/{id}/edit', [MonthController::class, 'edit'])->name('months.edit');
+    Route::get('/months/{id}/consult', [MonthController::class, 'consult'])->name('months.consult');
     // Route::post('/users/updateBlockDays', [DayController::class, 'update'])->name('days.update');
 
 });

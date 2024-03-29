@@ -64,7 +64,7 @@ const logout = () => {
                                 </template>
                                 <template v-if="$page.props.auth.user.verified">
                                     <NavLink :href="route('preferences.index')" :active="route().current('preferences.index')">
-                                        Bloquear días
+                                        Consultar meses
                                     </NavLink>
                                 </template>
                             </div>

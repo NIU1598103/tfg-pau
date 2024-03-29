@@ -23,7 +23,10 @@
                         </div>
                     </div>
                     <Link :href="route('months.edit', month.id)" class="px-3 py-1 bg-blue-500 text-white rounded-md">
-                        Abrir mes
+                        Bloquear días
+                    </Link>
+                    <Link :href="route('months.consult', month.id)" class="px-3 py-1 bg-blue-500 text-white rounded-md">
+                        Consultar mes
                     </Link>
                     </li>
                 </ul>
