@@ -2,7 +2,7 @@
     import {Head, Link, useForm} from '@inertiajs/inertia-vue3';
     import AppLayout from '@/Layouts/AppLayout.vue';
     import { Dialog, DialogPanel, DialogTitle, TransitionChild, TransitionRoot } from '@headlessui/vue'
-    import { CheckCircleIcon  } from '@heroicons/vue/24/outline'
+    import { CheckCircleIcon, QuestionMarkCircleIcon } from '@heroicons/vue/24/outline';
     import { ref } from 'vue';
 
 const props = defineProps({
@@ -21,6 +21,7 @@ const props = defineProps({
         flexible: props.user.flexible === 1 ? true : false,
         total_guards: props.user.total_guards,
         weekend_guards: props.user.weekend_guards,
+        weekend_backing: props.user.weekend_backing,
     });
     const formActualUser = useForm({
         id: props.actualUser.id,
@@ -33,9 +34,10 @@ const props = defineProps({
         flexible: props.actualUser.flexible === 1 ? true : false,
         total_guards: props.actualUser.total_guards,
         weekend_guards: props.actualUser.weekend_guards,
+        weekend_backing: props.actualUser.weekend_backing,
     });
 
-    const openSuccessDialog = ref(false);
+    const openInfoDialog = ref(false);
 
     function submit(){
         form.post('/users/update');
@@ -182,7 +184,7 @@ const props = defineProps({
                 </fieldset>
                 </div>
             </div>
-            <div class="border-b border-gray-900/10 pb-5">
+            <div class="border-b border-gray-900/10 pb-5 bg-gray-100">
                 <div class="mt-4 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
                 <div class="sm:col-span-3">
                     <label for="total-guards" class="block text-sm font-medium leading-6 text-gray-900">Guardias al mes:</label>
@@ -197,6 +199,23 @@ const props = defineProps({
                     <input type="number" name="last-name" id="last-name" autocomplete="family-name" v-model="form.weekend_guards" class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6" />
                     </div>
                 </div>
+                <template v-if="props.user.type === 'Adjunto Junior' || props.user.type === 'Adjunto Senior'">
+                    
+                    <div class="sm:col-span-3">
+                        <label for="festivas" class="block text-sm font-medium leading-6 text-gray-900">ó refuerzos de fin de semana:</label>
+                        <div class="mt-2">
+                        <input type="number" name="last-name" id="last-name" autocomplete="family-name" v-model="form.weekend_backing" class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6" />
+                        </div>
+                    </div>
+                    <div class="sm:col-span-3">
+                        <div class="mt-2">
+                            <button type="button" @click="openInfoDialog = true" class="mt-7">
+                                <QuestionMarkCircleIcon class="h-5 w-5 mr-2 hover:bg-blue-300" aria-hidden="true" />
+                            </button>
+                            <!-- <button type="button" @click="openSuccessDialog = true">Hola</button> -->
+                        </div>
+                    </div>
+                </template>
 
                 
                 
@@ -232,8 +251,8 @@ const props = defineProps({
 
 
     <template>
-            <TransitionRoot as="template" :show="openSuccessDialog">
-                <Dialog as="div" class="relative z-10" @close="openSuccessDialog = false">
+            <TransitionRoot as="template" :show="openInfoDialog">
+                <Dialog as="div" class="relative z-10" @close="openInfoDialog = false">
                 <TransitionChild as="template" enter="ease-out duration-300" enter-from="opacity-0" enter-to="opacity-100" leave="ease-in duration-200" leave-from="opacity-100" leave-to="opacity-0">
                     <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" />
                 </TransitionChild>
@@ -244,19 +263,16 @@ const props = defineProps({
                         <DialogPanel class="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg">
                         <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
                             <div class="sm:flex sm:items-start">
-                            <div class="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-green-100 sm:mx-0 sm:h-10 sm:w-10">
-                                <CheckCircleIcon class="h-15 w-15 text-green-400" aria-hidden="true" />
+                            <div class="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full sm:mx-0 sm:h-10 sm:w-10">
+                                <QuestionMarkCircleIcon class="h-15 w-15" aria-hidden="true" />
                             </div>
                             <div class="mt-3 text-center sm:ml-4 sm:mt-0 sm:text-left">
-                                <DialogTitle as="h3" class="text-base font-semibold leading-10 text-gray-900">Perfil modificado con éxito.</DialogTitle> 
+                                <DialogTitle as="h3" class="text-base font-semibold leading-10 text-gray-900">Las guardias en fin de semana serán o el número de guardias en festivos indicada (completas), o los refuerzos de fin de semana indicados. Por ejemplo, si se indica 1 guardia en festivo ó 1 refuerzo de fin de semana, se considerará la opción que mejor se adapte a la hora de asignar todas las guardias. De momento no se puede indicar, por ejemplo, 2 en festivos ó 1+1 refuerzo de fin de semana.</DialogTitle> 
                             </div>
                             </div>
                         </div>
                         <div class="bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6">
-                            <!-- <button type="button" class="mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:mt-0 sm:w-auto" @click="openSuccessDialog = false" ref="cancelButtonRef">Cerrar</button> -->
-                            <Link :href="route('dashboard')" class="mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:mt-0 sm:w-auto">
-                                Ir a Inicio
-                            </Link>
+                            <button type="button" class="mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:mt-0 sm:w-auto" @click="openInfoDialog = false" ref="cancelButtonRef">Cerrar</button>
                         </div>
                         </DialogPanel>
                     </TransitionChild>
@@ -265,4 +281,5 @@ const props = defineProps({
                 </Dialog>
             </TransitionRoot>
         </template>
+        
 </template>
