@@ -67,6 +67,11 @@ const logout = () => {
                                         Consultar meses
                                     </NavLink>
                                 </template>
+                                <template v-if="$page.props.auth.user.admin">
+                                    <NavLink :href="route('weeks.index')" :active="route().current('weeks.index')">
+                                        Guardias transplante
+                                    </NavLink>
+                                </template>
                             </div>
                         </div>
 

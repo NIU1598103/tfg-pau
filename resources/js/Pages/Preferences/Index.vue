@@ -28,6 +28,13 @@
                     <Link :href="route('months.consult', month.id)" class="px-3 py-1 bg-blue-500 text-white rounded-md">
                         Consultar mes
                     </Link>
+
+                    <!-- <Link :href="route('guards.edit', month.id)" class="px-3 py-1 bg-blue-500 text-white rounded-md">
+                        Editar guardias
+                    </Link>
+                    <Link :href="route('guards.consult', month.id)" class="px-3 py-1 bg-blue-500 text-white rounded-md">
+                        Consultar mes
+                    </Link> -->
                     </li>
                 </ul>
                 </div>

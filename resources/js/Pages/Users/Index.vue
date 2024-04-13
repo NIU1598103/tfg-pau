@@ -1,7 +1,7 @@
 <script setup>
     import {Link, Head} from '@inertiajs/inertia-vue3';
     import AppLayout from '@/Layouts/AppLayout.vue';
-    import { ref } from 'vue';
+    import { ref, computed } from 'vue';
     import { Dialog, DialogPanel, DialogTitle, TransitionChild, TransitionRoot } from '@headlessui/vue'
     import { ExclamationTriangleIcon, CheckCircleIcon  } from '@heroicons/vue/24/outline'
     import {useForm} from '@inertiajs/inertia-vue3';
@@ -13,6 +13,19 @@
     const openSuccessDialog = ref(false);
     const userName = ref("");
     const userId = ref("");
+
+    const perPage = 5;
+    const currentPage = ref(1);
+
+    const totalPages = computed(() => Math.ceil(props.users.length / perPage));
+
+    const paginatedUsers = computed(() => {
+    const startIndex = (currentPage.value - 1) * perPage;
+    const endIndex = startIndex + perPage;
+    return props.users.slice(startIndex, endIndex);
+    });
+
+
     const form = useForm({
         name: userName,
         id: userId,
@@ -34,6 +47,17 @@
         //         openSuccessDialog.value = true;
         // });
     };
+    const nextPage = () => {
+    if (currentPage.value < totalPages.value) {
+        currentPage.value++;
+    }
+    };
+
+    const prevPage = () => {
+    if (currentPage.value > 1) {
+        currentPage.value--;
+    }
+    };
 </script>
 
 <template>
@@ -44,10 +68,11 @@
         <template v-if="$page.props.auth.user.admin">
             <div class="flex justify-center h-screen bg-white">
                 <div>
-                <h1 class="text-base font-semibold leading-7 text-gray-900 mt-4">Lista usuarios:</h1>
+                    
+                <h1 class="text-base font-semibold leading-7 text-gray-900 mt-2">Lista usuarios:</h1>
                 
                 <ul role="list" class="divide-y divide-gray-200 bg-gray-100">
-                    <li v-for="user in users" :key="user.email" class="flex justify-between gap-x-6 py-5">
+                    <li v-for="user in paginatedUsers" :key="user.email" class="flex justify-between gap-x-6 py-5">
                     <div class="flex min-w-0 gap-x-4 mr-10 ml-4">
                         <img class="h-12 w-12 flex-none rounded-full bg-gray-50" :src="user.profile_photo_url" alt="" />
                         <div class="min-w-0 flex-auto">
@@ -72,15 +97,16 @@
                         <Link :href="route('users.edit', user.id)" class="block mb-2 px-3 py-1 bg-blue-500 text-white rounded-md text-center">
                             Editar
                         </Link>
-                        <!-- <Link :href="route('users.delete', user.id)" class="block px-3 py-1 bg-red-500 text-white rounded-md text-center">
-                            Eliminar
-                        </Link> -->
-                        <button @click="showDialog(user)" class="block mb-2 px-3 py-1 bg-red-500 text-white rounded-md text-center">
+                        <button @click="showDialog(user)" class="block px-3 py-1 bg-red-500 text-white rounded-md text-center">
                             Eliminar
                         </button>
                     </div>
                     </li>
                 </ul>
+                <div class="flex justify-center bg-white mt-2">
+                    <button @click="prevPage" :disabled="currentPage === 1" class="mr-2 px-3 py-1 bg-blue-500 text-white rounded-md">Anterior</button>
+                    <button @click="nextPage" :disabled="currentPage === totalPages" class="ml-2 px-3 py-1 bg-blue-500 text-white rounded-md">Siguiente</button>
+                </div>
                 </div>
             </div>
         </template>

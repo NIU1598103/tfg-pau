@@ -48,6 +48,7 @@ class UserController extends Controller
         $user->weekend_guards = $request->weekend_guards;
         $user->total_guards = $request->total_guards;
         $user->flexible = $request->flexible;
+        $user->weekend_backing = $request->weekend_backing;
         $user->save();
         $action = "PerfilUpdate";
         // return redirect()->route('users.index');

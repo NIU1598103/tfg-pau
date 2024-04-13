@@ -9,6 +9,7 @@ use App\Http\Controllers\PreferencesController;
 use App\Http\Controllers\DayController;
 use App\Http\Controllers\MonthController;
 use App\Http\Controllers\FeedbackController;
+use App\Http\Controllers\WeekController;
 
 /*
 |--------------------------------------------------------------------------
@@ -63,5 +64,8 @@ Route::middleware([
     Route::get('/months/{id}/edit', [MonthController::class, 'edit'])->name('months.edit');
     Route::get('/months/{id}/consult', [MonthController::class, 'consult'])->name('months.consult');
     // Route::post('/users/updateBlockDays', [DayController::class, 'update'])->name('days.update');
-
+    
+    Route::get('/weeks', [WeekController::class, 'index'])->name('weeks.index');
+    Route::get('/weeks/{week}/edit', [WeekController::class, 'edit'])->name('weeks.edit');
+    Route::post('/weeks/update_guard_transplant', [WeekController::class, 'update_guard_transplant'])->name('weeks.update_guard_transplant');
 });
