@@ -61,10 +61,10 @@
                   <div v-if="day.week_day === 0">
                     al día <b>{{ day.day }}/{{ day.month }}/{{ day.year }}</b>
                     <div v-if="day.name_guardTransplant" class="bg-blue-200 mb-3">
-                      Guardia de transplante: <b>{{ day.name_guardTransplant }}</b>
+                      Guardia de trasplante: <b>{{ day.name_guardTransplant }}</b>
                     </div>
                     <div v-else class="bg-red-200 mb-3">
-                      Guardia de transplante no asignado
+                      Guardia de trasplante no asignado
                     </div>
                   </div>
                 </div>

@@ -69,7 +69,12 @@ const logout = () => {
                                 </template>
                                 <template v-if="$page.props.auth.user.admin">
                                     <NavLink :href="route('weeks.index')" :active="route().current('weeks.index')">
-                                        Guardias transplante
+                                        Guardias trasplante
+                                    </NavLink>
+                                </template>
+                                <template v-if="$page.props.auth.user.admin">
+                                    <NavLink :href="route('months.index')" :active="route().current('months.index')">
+                                        Organizar guardias
                                     </NavLink>
                                 </template>
                             </div>

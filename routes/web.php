@@ -63,7 +63,10 @@ Route::middleware([
     Route::resource('months', MonthController::class);
     Route::get('/months/{id}/edit', [MonthController::class, 'edit'])->name('months.edit');
     Route::get('/months/{id}/consult', [MonthController::class, 'consult'])->name('months.consult');
+    Route::get('/months', [MonthController::class, 'index'])->name('months.index');
     // Route::post('/users/updateBlockDays', [DayController::class, 'update'])->name('days.update');
+    Route::post('/months/organize_guards', [MonthController::class, 'organize_guards'])->name('months.organize_guards');
+    Route::post('/months/clean_guards', [MonthController::class, 'clean_guards'])->name('months.clean_guards');
     
     Route::get('/weeks', [WeekController::class, 'index'])->name('weeks.index');
     Route::get('/weeks/{week}/edit', [WeekController::class, 'edit'])->name('weeks.edit');
