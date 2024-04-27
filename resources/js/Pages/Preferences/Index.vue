@@ -22,12 +22,18 @@
                             <p class="text-sm font-semibold leading-6 text-gray-900">{{ month.name }}</p>
                         </div>
                     </div>
-                    <Link :href="route('months.edit', month.id)" class="px-3 py-1 bg-blue-500 text-white rounded-md">
+                    <a :href="route('months.edit', month.id)" class="px-3 py-1 bg-blue-500 text-white rounded-md">
+                        Bloquear días
+                    </a>
+                    <a :href="route('months.consult', month.id)" class="px-3 py-1 bg-blue-500 text-white rounded-md">
+                        Consultar mes
+                    </a>
+                    <!-- <Link :href="route('months.edit', month.id)" class="px-3 py-1 bg-blue-500 text-white rounded-md">
                         Bloquear días
                     </Link>
                     <Link :href="route('months.consult', month.id)" class="px-3 py-1 bg-blue-500 text-white rounded-md">
                         Consultar mes
-                    </Link>
+                    </Link> -->
 
                     <!-- <Link :href="route('guards.edit', month.id)" class="px-3 py-1 bg-blue-500 text-white rounded-md">
                         Editar guardias

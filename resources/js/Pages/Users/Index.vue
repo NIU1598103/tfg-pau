@@ -94,9 +94,11 @@
                         </div>
                     </div>
                     <div class="mr-4">
-                        <Link :href="route('users.edit', user.id)" class="block mb-2 px-3 py-1 bg-blue-500 text-white rounded-md text-center">
+                        <!-- <Link :href="route('users.edit', user.id)" class="block mb-2 px-3 py-1 bg-blue-500 text-white rounded-md text-center">
                             Editar
-                        </Link>
+                        </Link> -->
+                        <a :href="route('users.edit', user.id)" class="block mb-2 px-3 py-1 bg-blue-500 text-white rounded-md text-center">Editar</a>
+
                         <button @click="showDialog(user)" class="block px-3 py-1 bg-red-500 text-white rounded-md text-center">
                             Eliminar
                         </button>

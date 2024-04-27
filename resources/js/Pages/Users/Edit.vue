@@ -251,9 +251,9 @@ const props = defineProps({
         </div>
 
             <div class="mt-4 flex items-center justify-end gap-x-6 pb-4">
-            <Link :href="route('users.index', props.user.id)" class="text-sm font-semibold leading-6 text-gray-900">
+            <a :href="route('users.index', props.user.id)" class="text-sm font-semibold leading-6 text-gray-900">
                             Cancelar
-                        </Link>
+            </a>
             <!-- <Link :href="route('users.index', user.id)" class="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
                             Guardar
                         </Link> -->
