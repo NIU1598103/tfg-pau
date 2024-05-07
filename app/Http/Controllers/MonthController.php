@@ -101,7 +101,7 @@ class MonthController extends Controller
         $month = Month::find($request->month);
         $days = $month->days;
         $users = User::where('verified', true)->get();
-         dd($users);
+        //  dd($users);
         //  dd($days);
         // foreach($days as $day){
         //     // dd($days);
@@ -144,7 +144,7 @@ class MonthController extends Controller
 
         //array que farem servir per als Adjunts Junior
         $guards_r1 = [];
-
+        
         foreach($residents1 as $user)
         {
             $blocked_days_json = json_decode($user->blocked_days);
@@ -190,7 +190,8 @@ class MonthController extends Controller
             $user->guards_assigned = json_encode($guards_assigned);
             $user->save();
         }
-    
+        $guards_r4 = [];
+
         // dd($guards_r1);
         foreach($residents4 as $user)
         {
@@ -231,6 +232,8 @@ class MonthController extends Controller
 
                                 $new_blocked_days = [];
                                 $guards[] = $day->day;
+                                $guards_r4[] = $day->day;
+
                                 $total_guards -= 1;
                                 $friday_done = true;
                                 if($day->day !== 1){
@@ -260,6 +263,7 @@ class MonthController extends Controller
                             $day->save();
                             $new_blocked_days = [];
                             $guards[] = $day->day;
+                            $guards_r4[] = $day->day;
                             $total_guards -= 1;
                             $weekend_guards -= 1;
                             if($day->day !== 1){
@@ -291,6 +295,7 @@ class MonthController extends Controller
 
                             $new_blocked_days = [];
                             $guards[] = $day->day;
+                            $guards_r4[] = $day->day;
                             $total_guards -= 1;
                             // dd($guards);
                             if($day->day !== 1){
@@ -522,6 +527,7 @@ class MonthController extends Controller
             $user->save();
             // dd($user->guards_assigned);
         }
+        // dd($guards_r4);
     
         foreach($adjuntsJunior as $user)
         {            
@@ -530,10 +536,153 @@ class MonthController extends Controller
                 dd($user);
             }
             $blocked_days = $blocked_days_json->{$month->name};
+            $total_guards = $user->total_guards;
+            $weekend_guards = $user->weekend_guards;
+            $guards = [];
 
-            
+            //primer findes
+            //es pot provar agafant-los al reves?
+            // shuffle($days);
+            $days_a = $days->shuffle();
+            // dd($days_a);
+            foreach($days_a as $day)
+            {
+                if($total_guards === 0 || $weekend_guards === 0){
+                    break; 
+                }
+                if($day->id_guardTransplant === $user->id)
+                {
+                    continue;
+                }
+                if($day->week_day === 6 || $day->week_day === 0) //dissabte o diumenge
+                {
+                    //mirem si hi ha reforços disponibles 
+                    if(!in_array($day->day, $blocked_days) && !in_array($day->day, $guards))
+                    {
+                        if($day->user_id === null)
+                        {
+                            $day->user_id = $user->id;
+                            $day->save();
+                            // dd($day);
+    
+                            $new_blocked_days = [];
+                            $guards[] = $day->day;
+    
+                            $total_guards -= 1;
+                            $weekend_guards -= 1;
+                            if($day->day !== 1){
+                                $new_blocked_days[] = $day->day-1;
+                            }
+                            if($day->day !== count($days)){
+                                $new_blocked_days[] = $day->day+1;
+                                if($day->week_day === 6){
+                                    $new_blocked_days[] = $day->day+2;
+                                }
+                            }
+                            $blocked_days = array_merge($blocked_days,$new_blocked_days);
+                            
+                        }
+                        else if($day->id_ref === null)
+                        {
+                            if(in_array($day->day, $guards_r3_2) || in_array($day->day, $guards_r1) || in_array($day->day, $guards_r4))
+                            {
+                                $day->id_ref = $user->id;
+                                $day->save();
+                                // dd($day);
+        
+                                $new_blocked_days = [];
+                                $guards[] = $day->day;
+        
+                                $total_guards -= 1;
+                                $weekend_guards -= 1;
+                                if($day->day !== 1){
+                                    $new_blocked_days[] = $day->day-1;
+                                }
+                                if($day->day !== count($days)){
+                                    $new_blocked_days[] = $day->day+1;
+                                    if($day->week_day === 6){
+                                        $new_blocked_days[] = $day->day+2;
+                                    }
+                                }
+                                $blocked_days = array_merge($blocked_days,$new_blocked_days);
+                                
+                            }
+                        }
+                        
+                    }
+                }
+            }
+                // dd($guards);
+
+            //mirem els altres:
+            foreach($days_a as $day)
+            {
+                if($total_guards === 0){
+                    break; 
+                }
+                if($day->id_guardTransplant === $user->id)
+                {
+                    continue;
+                }
+                if($day->week_day !== 6 && $day->week_day !== 0) //no finde
+                {
+                    if(!in_array($day->day, $blocked_days) && !in_array($day->day, $guards) && $day->user_id === null)
+                    {
+                        $day->user_id = $user->id;
+                        $day->save();
+
+                        $new_blocked_days = [];
+                        $guards[] = $day->day;
+
+                        $total_guards -= 1;
+                        $weekend_guards -= 1;
+                        if($day->day !== 1){
+                            $new_blocked_days[] = $day->day-1;
+                        }
+                        if($day->day !== count($days)){
+                            $new_blocked_days[] = $day->day+1;
+                        }
+                        $blocked_days = array_merge($blocked_days,$new_blocked_days);
+                        
+                    }
+                    else if(!in_array($day->day, $blocked_days) && !in_array($day->day, $guards) && $day->id_ref === null)
+                    {
+                        $day->id_ref = $user->id;
+                        $day->save();
+
+                        $new_blocked_days = [];
+                        $guards[] = $day->day;
+
+                        $total_guards -= 1;
+                        $weekend_guards -= 1;
+                        if($day->day !== 1){
+                            $new_blocked_days[] = $day->day-1;
+                        }
+                        if($day->day !== count($days)){
+                            $new_blocked_days[] = $day->day+1;
+                        }
+                        $blocked_days = array_merge($blocked_days,$new_blocked_days);
+                        
+                    }
+                }
+            }
+
+            //ara falta omplir els dies buits amb els adjunts "flexibles"
         }
 
+        $users_flexibles = User::where('verified', true)
+                        ->where('flexible', true)->get();
+        // dd($month);
+        $empty_days = [];
+        
+        foreach($month->days as $day){
+            if($day->user_id === null){
+                $empty_days[] = $day->day;
+            }
+        }
+        dd($empty_days, $month->days);
+        dd($users_flexibles);
+        // dd($days_a);
 
     }
 
