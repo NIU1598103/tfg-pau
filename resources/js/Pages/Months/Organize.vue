@@ -48,6 +48,10 @@
                     <button @click="handleOrganizeGuardiasClick(month.id)" class="px-3 py-1 bg-blue-500 text-white rounded-md">
                         Organizar guardias
                     </button>
+                    <a :href="route('months.see_guards', month.id)" class="px-3 py-1 bg-blue-500 text-white rounded-md">
+                        Ver guardias
+                    </a>
+
                     <button @click="cleanGuardsClick(month.id)" class="px-3 py-1 bg-red-500 text-white rounded-md">
                         Borrar guardias
                     </button>

@@ -30,9 +30,6 @@
             return result + 1;
         };
 
-        const isDayBlocked = (day) => {
-            return props.daysBlocked.includes(day);
-        }
 
 
 
@@ -45,7 +42,7 @@
     <AppLayout>
         <div class="flex justify-center h-screen bg-white">
             <div>
-            <h1 style="margin: 10px; font-size: 18px;"> Días bloqueados por <strong>{{ props.user.name }} </strong> el mes  <strong>{{month.name}}</strong></h1>
+            <h1 style="margin: 10px; font-size: 18px;"> Calendario de guardias para el mes <strong>{{ month.name }}</strong> </h1>
                 <table class="bg-gray-100" style="width: 100%;">
                     <thead>
                         <tr>
@@ -65,12 +62,16 @@
                                     <template v-if="!daysExtra[(week - 1) * 7 + dayOfWeek - 1]"></template>
                                     <template v-else-if="daysExtra[(week - 1) * 7 + dayOfWeek - 1].day === 44"></template>
                                     <template v-else>
-                                        <template v-if="isDayBlocked(daysExtra[(week - 1) * 7 + dayOfWeek - 1].day)">
-                                            <div style="border: 2px solid black; padding: 10px; margin-bottom: 10px; font-size: 20px;" class="bg-red-200 text-center">{{ daysExtra[(week - 1) * 7 + dayOfWeek - 1].day }}</div>
-                                        </template>
-                                        <template v-else>
-                                            <div style="border: 2px solid black; padding: 10px; margin-bottom: 10px; font-size: 20px;" class="text-center">{{ daysExtra[(week - 1) * 7 + dayOfWeek - 1].day }}</div>
-                                        </template>
+                                        <div style="border: 2px solid black; padding: 10px; margin-bottom: 10px;">
+                                            <div>
+                                                <strong>{{ daysExtra[(week - 1) * 7 + dayOfWeek - 1].day }}</strong>
+                                            </div>
+                                            <div>
+                                                {{ daysExtra[(week - 1) * 7 + dayOfWeek - 1].user_name }} + {{ daysExtra[(week - 1) * 7 + dayOfWeek - 1].ref_name }}
+                                            </div>
+                                        </div>
+
+
                                     </template>
                                 </td>
                             </tr>

@@ -77,6 +77,48 @@ class MonthController extends Controller
         ]);
     }
 
+    public function see_guards($id)
+    {
+        $month = Month::findOrFail($id);
+        $days = $month->days;
+        $firstDay = Day::where('month_id', $month->id)->orderBy('day')->first();
+        if($firstDay->week_day != 1){
+            
+            $numberOfSpaces = ($firstDay->week_day + 6) % 7;
+            $daysArray = $month->days->toArray();
+            $emptyDay = new Day();
+            $emptyDay->day = 44;
+            $daysExtra = array_fill(0, $numberOfSpaces, $emptyDay);
+            $daysExtra = array_merge($daysExtra, $daysArray);
+        }else{
+            $daysExtra = $month->days;
+        }
+        $user = Auth::user();
+        $blocked_days_decode = [];
+        if (!empty($user->blocked_days)) {
+            $blocked_days_decode = json_decode($user->blocked_days, true);
+            if (!is_array($blocked_days_decode)) {
+                $blocked_days_decode = [];
+            }
+        }
+
+        if(array_key_exists($month->name, $blocked_days_decode)){
+
+            // dd($blocked_days_decode[$month->name]);
+            $daysBlocked = $blocked_days_decode[$month->name];
+        }else{
+            $daysBlocked = [];
+        }
+        // dd($daysBlocked);
+        return Inertia::render('Months/SeeGuards', [
+            'month' => $month,
+            'days' => $days,
+            'daysExtra' => $daysExtra,
+            'user' => $user,
+            'daysBlocked' => $daysBlocked,
+        ]);
+    }
+
     public function index(){
         $users = User::all();
         $months = Month::all();
@@ -93,9 +135,14 @@ class MonthController extends Controller
             // dd($days);
             $day->user_id = null;
             $day->id_ref = null;
+            $day->ref_name = null;
+            $day->user_name = null;
             $day->save();
         }
     }
+
+
+
 
     public function organize_guards(Request $request){
         $month = Month::find($request->month);
@@ -144,7 +191,8 @@ class MonthController extends Controller
 
         //array que farem servir per als Adjunts Junior
         $guards_r1 = [];
-        
+        $days = $days->shuffle();
+        // dd($days);
         foreach($residents1 as $user)
         {
             $blocked_days_json = json_decode($user->blocked_days);
@@ -166,6 +214,8 @@ class MonthController extends Controller
                     if(!in_array($day->day, $blocked_days) && !in_array($day->day, $guards) && $day->user_id === null)
                     {
                         $day->user_id = $user->id;
+                        $day->user_name = $user->name;
+
                         $day->save();
 
                         $new_blocked_days = [];
@@ -191,6 +241,7 @@ class MonthController extends Controller
             $user->save();
         }
         $guards_r4 = [];
+        $days = $days->shuffle();
 
         // dd($guards_r1);
         foreach($residents4 as $user)
@@ -228,6 +279,8 @@ class MonthController extends Controller
                             }                   
                             if($day->user_id === null){
                                 $day->user_id = $user->id;
+                                $day->user_name = $user->name;
+
                                 $day->save();
 
                                 $new_blocked_days = [];
@@ -260,6 +313,8 @@ class MonthController extends Controller
 
                         if($day->user_id === null){
                             $day->user_id = $user->id;
+                            $day->user_name = $user->name;
+
                             $day->save();
                             $new_blocked_days = [];
                             $guards[] = $day->day;
@@ -291,6 +346,8 @@ class MonthController extends Controller
                         if(!in_array($day->day, $guards) && !in_array($day->day, $blocked_days) && $day->user_id === null)
                         {
                             $day->user_id = $user->id;
+                            $day->user_name = $user->name;
+
                             $day->save();
 
                             $new_blocked_days = [];
@@ -333,6 +390,9 @@ class MonthController extends Controller
 
         }
 
+        
+        $days = $days->shuffle();
+
         //array que farem servir amb els Adjunts Senior
         $guards_r3_2 = [];
         foreach($residents3_2 as $user)
@@ -361,6 +421,8 @@ class MonthController extends Controller
                     if(!in_array($day->day, $blocked_days) && !in_array($day->day, $guards) && $day->user_id === null)
                     {
                         $day->user_id = $user->id;
+                        $day->user_name = $user->name;
+
                         $day->save();
 
                         $new_blocked_days = [];
@@ -399,6 +461,8 @@ class MonthController extends Controller
                 if(!in_array($day->day, $blocked_days) && !in_array($day->day, $guards) && $day->user_id === null)
                 {
                     $day->user_id = $user->id;
+                    $day->user_name = $user->name;
+
                     $day->save();
 
                     $new_blocked_days = [];
@@ -424,6 +488,8 @@ class MonthController extends Controller
             $user->save();
         }
         // dd($days);
+        $days = $days->shuffle();
+
         foreach($adjuntsSenior as $user)
         {
             if($user->name === 'MCB'){
@@ -460,6 +526,7 @@ class MonthController extends Controller
                     if(!in_array($day->day, $blocked_days) && !in_array($day->day, $guards) && in_array($day->day, $guards_r3_2) && $day->id_ref === null)
                     {
                         $day->id_ref = $user->id;
+                        $day->ref_name = $user->name;
                         $day->save();
                         // dd($day);
 
@@ -498,6 +565,7 @@ class MonthController extends Controller
                     if(!in_array($day->day, $blocked_days) && !in_array($day->day, $guards) && in_array($day->day, $guards_r3_2) && $day->id_ref === null)
                     {
                         $day->id_ref = $user->id;
+                        $day->ref_name = $user->name;
                         $day->save();
 
                         $new_blocked_days = [];
@@ -562,6 +630,7 @@ class MonthController extends Controller
                         if($day->user_id === null)
                         {
                             $day->user_id = $user->id;
+                            $day->user_name = $user->name;
                             $day->save();
                             // dd($day);
     
@@ -587,6 +656,7 @@ class MonthController extends Controller
                             if(in_array($day->day, $guards_r3_2) || in_array($day->day, $guards_r1) || in_array($day->day, $guards_r4))
                             {
                                 $day->id_ref = $user->id;
+                                $day->ref_name = $user->name;
                                 $day->save();
                                 // dd($day);
         
@@ -629,6 +699,7 @@ class MonthController extends Controller
                     if(!in_array($day->day, $blocked_days) && !in_array($day->day, $guards) && $day->user_id === null)
                     {
                         $day->user_id = $user->id;
+                        $day->user_name = $user->name;
                         $day->save();
 
                         $new_blocked_days = [];
@@ -648,6 +719,7 @@ class MonthController extends Controller
                     else if(!in_array($day->day, $blocked_days) && !in_array($day->day, $guards) && $day->id_ref === null)
                     {
                         $day->id_ref = $user->id;
+                        $day->ref_name = $user->name;
                         $day->save();
 
                         $new_blocked_days = [];
@@ -674,13 +746,20 @@ class MonthController extends Controller
                         ->where('flexible', true)->get();
         // dd($month);
         $empty_days = [];
-        
-        foreach($month->days as $day){
+        $count = 0;
+        foreach($month->days as $day)
+        {
             if($day->user_id === null){
                 $empty_days[] = $day->day;
+                $day->user_id = $users_flexibles[$count]->id;
+                $day->user_name = $users_flexibles[$count]->name;
+                $count += 1;
+            }
+            if($count >= count($users_flexibles)){
+                break;
             }
         }
-        dd($empty_days, $month->days);
+        dd($empty_days, $month->days, $users_flexibles);
         dd($users_flexibles);
         // dd($days_a);
 

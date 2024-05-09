@@ -61,8 +61,8 @@
 
         <div class="flex justify-center h-screen bg-white">
             <div>
-            <h1> {{month.name}}, {{ weeksInMonth() }}, {{ props.user.name }} </h1>
-                <table class="bg-gray-100">
+                <h1 style="margin: 10px; font-size: 18px;">Bloqueando días para <strong>{{ props.user.name }} </strong> el mes  <strong>{{month.name}}</strong></h1>
+                <table class="bg-gray-100" style="width: 100%;">
                     <thead>
                         <tr>
                             <th>Lun</th>
@@ -77,28 +77,20 @@
                     <tbody>
                         <template v-for="week in weeksInMonth()" :key="week">
                             <tr>
-
-                                <!-- <div v-for="day in daysExtra">{{day.day}}</div> -->
-                                <!-- <template v-if="added === 1"> -->
                                 <td v-for="dayOfWeek in 7" :key="dayOfWeek">
                                     <template v-if="!daysExtra[(week - 1) * 7 + dayOfWeek - 1]"></template>
                                     <template v-else-if="daysExtra[(week - 1) * 7 + dayOfWeek - 1].day === 44"></template>
                                     <template v-else>
-                                        <input type="checkbox" :id="'checkbox_' + daysExtra[(week - 1) * 7 + dayOfWeek - 1].day" :value="daysExtra[(week - 1) * 7 + dayOfWeek - 1].day" v-model="selectedDays">
-                                        <label :for="'checkbox_' + daysExtra[(week - 1) * 7 + dayOfWeek - 1].day">{{ daysExtra[(week - 1) * 7 + dayOfWeek - 1].day }}</label>
-                                        <!-- {{ daysExtra[(week - 1) * 7 + dayOfWeek - 1].day }} -->
+                                        <div style="border: 2px solid black; padding: 10px; margin-bottom: 10px;">
+                                            <div>
+                                                <label :for="'checkbox_' + daysExtra[(week - 1) * 7 + dayOfWeek - 1].day" style="font-size: 20px;">{{ daysExtra[(week - 1) * 7 + dayOfWeek - 1].day }}</label>
+                                            </div>
+                                            <div>
+                                                <input type="checkbox" :id="'checkbox_' + daysExtra[(week - 1) * 7 + dayOfWeek - 1].day" :value="daysExtra[(week - 1) * 7 + dayOfWeek - 1].day" v-model="selectedDays">
+                                            </div>
+                                        </div>
                                     </template>
                                 </td>
-                                <!-- </template>
-                                <template v-else>
-                                <td v-for="dayOfWeek in 7" :key="dayOfWeek">
-                                    <template v-if="daysExtra[(week - 1) * 7 + dayOfWeek - 1]">
-                                        <input type="checkbox" :id="'checkbox_' + daysExtra[(week - 1) * 7 + dayOfWeek - 1].day" :value="daysExtra[(week - 1) * 7 + dayOfWeek - 1].day" v-model="selectedDays">
-                                        <label :for="'checkbox_' + daysExtra[(week - 1) * 7 + dayOfWeek - 1].day">{{ daysExtra[(week - 1) * 7 + dayOfWeek - 1].day }}</label>
-                                    </template>
-                                    <template v-else></template>
-                                </td>
-                                </template> -->
                             </tr>
                         </template>
                     </tbody>
