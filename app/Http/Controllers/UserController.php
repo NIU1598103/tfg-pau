@@ -49,6 +49,7 @@ class UserController extends Controller
         $user->total_guards = $request->total_guards;
         $user->flexible = $request->flexible;
         $user->weekend_backing = $request->weekend_backing;
+        $user->less_guards_if_transplant = $request->less_guards_if_transplant;
         $user->save();
         $action = "PerfilUpdate";
         // return redirect()->route('users.index');

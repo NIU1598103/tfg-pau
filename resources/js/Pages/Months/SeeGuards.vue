@@ -69,6 +69,9 @@
                                             <div>
                                                 {{ daysExtra[(week - 1) * 7 + dayOfWeek - 1].user_name }} + {{ daysExtra[(week - 1) * 7 + dayOfWeek - 1].ref_name }}
                                             </div>
+                                            <div>
+                                                Trasplante: {{ daysExtra[(week - 1) * 7 + dayOfWeek - 1].name_guardTransplant }}
+                                            </div>
                                         </div>
 
 

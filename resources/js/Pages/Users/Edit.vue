@@ -22,6 +22,8 @@ const props = defineProps({
         total_guards: props.user.total_guards,
         weekend_guards: props.user.weekend_guards,
         weekend_backing: props.user.weekend_backing,
+        less_guards_if_transplant: props.user.less_guards_if_transplant  === 1 ? true : false,
+
     });
     const formActualUser = useForm({
         id: props.actualUser.id,
@@ -35,6 +37,7 @@ const props = defineProps({
         total_guards: props.actualUser.total_guards,
         weekend_guards: props.actualUser.weekend_guards,
         weekend_backing: props.actualUser.weekend_backing,
+        less_guards_if_transplant: props.actualUser.less_guards_if_transplant  === 1 ? true : false,
     });
 
     const openInfoDialog = ref(false);
@@ -75,23 +78,7 @@ const props = defineProps({
                             <input type="number" name="last-name" id="last-name" autocomplete="family-name" v-model="formActualUser.weekend_guards" class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6" />
                         </div>
                     </div>                    
-                    <template v-if="formActualUser.type === 'Adjunto Junior' || formActualUser.type === 'Adjunto Senior'">
-        
-                        <div class="sm:col-span-3">
-                            <label for="festivas" class="block text-sm font-medium leading-6 text-gray-900">ó refuerzos de fin de semana:</label>
-                            <div class="mt-2">
-                            <input type="number" name="last-name" id="last-name" autocomplete="family-name" v-model="formActualUser.weekend_backing" class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6" />
-                            </div>
-                        </div>
-                        <div class="sm:col-span-3">
-                            <div class="mt-2">
-                                <button type="button" @click="openInfoDialog = true" class="mt-7">
-                                    <QuestionMarkCircleIcon class="h-5 w-5 mr-2 hover:bg-blue-300" aria-hidden="true" />
-                                </button>
-                                <!-- <button type="button" @click="openSuccessDialog = true">Hola</button> -->
-                            </div>
-                        </div>
-                </template>
+                    
                     </div>
                     <div class="relative flex gap-x-3">
                                 <div class="flex h-6 items-center">
@@ -100,6 +87,13 @@ const props = defineProps({
                                 <div class="text-sm leading-6">
                                 <label for="transplant" class="font-medium text-gray-900">Flexible</label>
                                 <p class="text-gray-500">Si seleccionas esta casilla, el usuario se ofrece a hacer 1 guardia extra si es necesario.</p>
+                                </div>
+                                <div class="flex h-6 items-center">
+                                <input id="transplant" name="transplant" type="checkbox" v-model="formActualUser.less_guards_if_transplant" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600" />
+                                </div>
+                                <div class="text-sm leading-6">
+                                <label for="transplant" class="font-medium text-gray-900">Menos guardias en semana de trasplante</label>
+                                <p class="text-gray-500">Si seleccionas esta casilla, el usuario hará 1 guardia menos el mes que le toque guardia de trasplante.</p>
                                 </div>
                             </div>
                             <div class="flex justify-center mt-4">
@@ -192,8 +186,8 @@ const props = defineProps({
                             <input id="transplant" name="transplant" type="checkbox" v-model="form.transplant" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600" />
                             </div>
                             <div class="text-sm leading-6">
-                            <label for="transplant" class="font-medium text-gray-900">Guardia de transplante</label>
-                            <p class="text-gray-500">Si seleccionas esta casilla, el usuario puede hacer guardias de transplante.</p>
+                            <label for="transplant" class="font-medium text-gray-900">Guardia de trasplante</label>
+                            <p class="text-gray-500">Si seleccionas esta casilla, el usuario puede hacer guardias de trasplante.</p>
                             </div>
                         </div>
                         
@@ -216,23 +210,7 @@ const props = defineProps({
                     <input type="number" name="last-name" id="last-name" autocomplete="family-name" v-model="form.weekend_guards" class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6" />
                     </div>
                 </div>
-                <template v-if="props.user.type === 'Adjunto Junior' || props.user.type === 'Adjunto Senior'">
-                    
-                    <div class="sm:col-span-3">
-                        <label for="festivas" class="block text-sm font-medium leading-6 text-gray-900">ó refuerzos de fin de semana:</label>
-                        <div class="mt-2">
-                        <input type="number" name="last-name" id="last-name" autocomplete="family-name" v-model="form.weekend_backing" class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6" />
-                        </div>
-                    </div>
-                    <div class="sm:col-span-3">
-                        <div class="mt-2">
-                            <button type="button" @click="openInfoDialog = true" class="mt-7">
-                                <QuestionMarkCircleIcon class="h-5 w-5 mr-2 hover:bg-blue-300" aria-hidden="true" />
-                            </button>
-                            <!-- <button type="button" @click="openSuccessDialog = true">Hola</button> -->
-                        </div>
-                    </div>
-                </template>
+                
 
                 
                 
@@ -244,6 +222,13 @@ const props = defineProps({
                             <div class="text-sm leading-6">
                             <label for="transplant" class="font-medium text-gray-900">Flexible</label>
                             <p class="text-gray-500">Si seleccionas esta casilla, el usuario se ofrece a hacer 1 guardia extra si es necesario.</p>
+                            </div>
+                            <div class="flex h-6 items-center">
+                            <input id="transplant" name="transplant" type="checkbox" v-model="form.less_guards_if_transplant" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600" />
+                            </div>
+                            <div class="text-sm leading-6">
+                            <label for="transplant" class="font-medium text-gray-900">Menos guardias en semana de trasplante</label>
+                            <p class="text-gray-500">Si seleccionas esta casilla, el usuario hará 1 guardia menos el mes que le toque guardia de trasplante.</p>
                             </div>
                         </div>
             </div>

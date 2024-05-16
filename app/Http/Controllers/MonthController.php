@@ -488,6 +488,64 @@ class MonthController extends Controller
             $user->save();
         }
         // dd($days);
+
+
+
+        //primer posem els REF + LOC
+        foreach ($adjuntsJunior as $user) 
+        {
+            $less_guards_if_transplant_restada = false;
+
+            foreach($days as $day)
+            {
+                if($day->id_guardTransplant === $user->id)
+                {
+                    if(in_array($day->day, $guards_r4) && $day->id_ref === null)
+                    {
+                        $refloc = "(REF+LOC)";
+                        $day->id_ref = $user->id;
+                        $day->ref_name = $user->name . $refloc;
+                        $day->save();
+                        if($user->less_guards_if_transplant === 1 && $less_guards_if_transplant_restada === false)
+                        {
+                            $user->aux_total_guards = $user->total_guards - 1;
+                            $user->save();
+                            $less_guards_if_transplant_restada = true;
+                        }
+                    }
+                    continue;
+                }
+            }
+        }
+        //posem els REF+LOC dels senior tambe
+        foreach ($adjuntsSenior as $user) 
+        {
+            if($user->name === 'MCB'){
+                continue;
+            }
+            $less_guards_if_transplant_restada = false;
+            foreach($days as $day)
+            {
+                if($day->id_guardTransplant === $user->id)
+                {
+                    if(in_array($day->day, $guards_r4) && $day->id_ref === null)
+                    {
+                        $refloc = "(REF+LOC)";
+                        $day->id_ref = $user->id;
+                        $day->ref_name = $user->name . $refloc;
+                        $day->save();
+                        if($user->less_guards_if_transplant === 1 && $less_guards_if_transplant_restada === false)
+                        {
+                            $user->aux_total_guards = $user->total_guards - 1;
+                            $user->save();
+                            $less_guards_if_transplant_restada = true;
+                        }
+                    }
+                    continue;
+                }
+            }
+        }
+
         $days = $days->shuffle();
 
         foreach($adjuntsSenior as $user)
@@ -501,6 +559,10 @@ class MonthController extends Controller
             }
             $blocked_days = $blocked_days_json->{$month->name};
             $total_guards = $user->total_guards;
+            if($user->aux_total_guards !== null)
+            {
+                $total_guards = $user->aux_total_guards;
+            }
             $weekend_guards = $user->weekend_guards;
             $guards = [];
                 
@@ -596,8 +658,24 @@ class MonthController extends Controller
             // dd($user->guards_assigned);
         }
         // dd($guards_r4);
-    
+        
+        $adjuntsJuniorSorted = [];
+        $adjuntsJuniorNoTr = [];
+        $adjuntsJuniorTr = [];
         foreach($adjuntsJunior as $user)
+        {
+            if($user->transplant === 1)
+            {
+                $adjuntsJuniorTr[] = $user;
+            }
+            else{
+                $adjuntsJuniorNoTr[] = $user;
+            }
+        }
+        $adjuntsJuniorSorted = array_merge($adjuntsJuniorNoTr, $adjuntsJuniorTr);
+      
+        //donem preferència als adjunts que no fan guardies de trasplantament
+        foreach($adjuntsJuniorSorted as $user)
         {            
             $blocked_days_json = json_decode($user->blocked_days);
             if($blocked_days_json === null){
@@ -605,6 +683,10 @@ class MonthController extends Controller
             }
             $blocked_days = $blocked_days_json->{$month->name};
             $total_guards = $user->total_guards;
+            if($user->aux_total_guards !== null)
+            {
+                $total_guards = $user->aux_total_guards;
+            }
             $weekend_guards = $user->weekend_guards;
             $guards = [];
 
@@ -653,7 +735,7 @@ class MonthController extends Controller
                         }
                         else if($day->id_ref === null)
                         {
-                            if(in_array($day->day, $guards_r3_2) || in_array($day->day, $guards_r1) || in_array($day->day, $guards_r4))
+                            if(in_array($day->day, $guards_r3_2) || in_array($day->day, $guards_r1))
                             {
                                 $day->id_ref = $user->id;
                                 $day->ref_name = $user->name;
@@ -738,7 +820,11 @@ class MonthController extends Controller
                     }
                 }
             }
-
+            $guards_assigned = json_decode($user->guards_assigned, true) ?? [];
+            $guards_assigned[$month->name] = $guards;
+            
+            $user->guards_assigned = json_encode($guards_assigned);
+            $user->save();
             //ara falta omplir els dies buits amb els adjunts "flexibles"
         }
 
@@ -747,20 +833,206 @@ class MonthController extends Controller
         // dd($month);
         $empty_days = [];
         $count = 0;
+        $users_flexibles = $users_flexibles->shuffle();
         foreach($month->days as $day)
         {
-            if($day->user_id === null){
-                $empty_days[] = $day->day;
-                $day->user_id = $users_flexibles[$count]->id;
-                $day->user_name = $users_flexibles[$count]->name;
-                $count += 1;
-            }
-            if($count >= count($users_flexibles)){
-                break;
+            if($day->week_day !== 6 && $day->week_day !== 0) //NO FINDE
+            {
+                if($day->id_ref === null){
+    
+                    $empty_days[] = $day;
+                }
+
             }
         }
-        dd($empty_days, $month->days, $users_flexibles);
-        dd($users_flexibles);
+        $empty_days_weekend = [];    
+        foreach($month->days as $day)
+        {
+            if($day->week_day === 6 || $day->week_day === 0)
+            {
+                if($day->id_ref === null){
+                    $empty_days_weekend[] = $day;
+                }
+            }
+        }
+        
+        $users_disponibles = []; //users amb guardies per assignar encara
+        $users_disponibles_weekend = []; // """ en findes
+        foreach($adjuntsJuniorSorted as $user)
+        {
+            
+            $guards_json = json_decode($user->guards_assigned);
+            $guards = $guards_json->{$month->name};
+            $total_guards = $user->total_guards;
+            if($user->aux_total_guards !== null)
+            {
+                $total_guards = $user->aux_total_guards;
+            }
+            $weekend_guards = $user->weekend_guards;
+
+            if(count($guards) < $total_guards)
+            {
+                $users_disponibles[] = $user;
+            }
+            $count_weekend_guards = 0;
+            foreach($days as $day)
+            {
+                if($day->week_day === 6 || $day->week_day === 0)
+                {
+                    if(in_array($day->day, $guards)){
+                        $count_weekend_guards += 1;
+                    }
+                }
+            }
+            if($count_weekend_guards < $weekend_guards)
+            {
+                $users_disponibles_weekend[] = $user;
+            }
+
+        }
+        // dd($users_disponibles, $users_disponibles_weekend);
+        
+        //primer hauriem de mirar els usuaris q no han completat les guardies
+        foreach($users_disponibles_weekend as $user)
+        {
+            $blocked_days_json = json_decode($user->blocked_days);
+            if($blocked_days_json === null){
+                dd($user);
+            }
+            $blocked_days = $blocked_days_json->{$month->name};
+            $guards_json = json_decode($user->guards_assigned);
+            $guards = $guards_json->{$month->name};
+
+            $assigned = false;
+            $assigned_emptys_weekend = [];
+            foreach($empty_days_weekend as $day)
+            {
+                $day_prev = $day->day - 1;
+                $day_after = $day->day + 1;
+                if(!in_array($day->day, $blocked_days) && !in_array($day->day, $guards) && !in_array($day_after, $guards) && !in_array($day_prev, $guards))
+                {
+                    $day->id_ref = $user->id;
+                    $day->ref_name = $user->name;
+                    $guards[] = $day->day;
+                    $day->save();
+                    $assigned = true;
+                    $assigned_emptys_weekend[] = $day;
+                    $users_disponibles = array_diff($users_disponibles, array($user));
+                    break;
+                }
+                else if($day->id_guardTransplant === $user->id)
+                {
+                    $refloc = "(REF+LOC)";
+                    $day->id_ref = $user->id;
+                    $day->ref_name = $user->name . $refloc;
+                    $guards[] = $day->day;
+                    $day->save();
+                    $assigned = true;
+                    $assigned_emptys_weekend[] = $day;
+                    $users_disponibles = array_diff($users_disponibles, array($user)); //ELIMINEM DE USERS DISPONIBLES
+                    break;
+
+                }
+            }
+            foreach($assigned_emptys_weekend as $day)
+            {
+                $empty_days_weekend = array_diff($empty_days_weekend, array($day));
+            }
+            $guards_assigned = json_decode($user->guards_assigned, true) ?? [];
+            $guards_assigned[$month->name] = $guards;
+            
+            $user->guards_assigned = json_encode($guards_assigned);
+            $user->save();
+            
+        }
+        
+        
+        //SI QUEDEN DIES DE FINDE PER COMPLETAR, ELS COMPLETA EL GUARDIA TRANSPLANT
+        if(count($empty_days_weekend) > 0)
+        {
+            foreach($empty_days_weekend as $day)
+            {
+                $day->id_ref = $day->id_guardTransplant;
+                $refloc = "(REF+LOC)";
+                $day->ref_name = $day->name_guardTransplant . $refloc;
+            }
+        }
+
+        dd($empty_days_weekend);
+
+        //FALTA OMPLIR GUARDIES ENTRE SETMANA --> BORRAR DE LA LLISTA ELS Q ASSIGNEM UN WEEKEND
+        foreach($users_disponibles as $user)
+        {
+
+        }
+
+
+        foreach($users_flexibles as $user)
+        {
+            $blocked_days_json = json_decode($user->blocked_days);
+            if($blocked_days_json === null){
+                dd($user);
+            }
+            $blocked_days = $blocked_days_json->{$month->name};
+            $guards_json = json_decode($user->guards_assigned);
+            $guards = $guards_json->{$month->name};
+            // dd($user);
+            //VEURE SI POT FER LA GUARDIA AQUELL DIA
+            $assigned = false;
+            foreach($empty_days as $day)
+            { 
+                $day_prev = $day->day - 1;
+                $day_after = $day->day + 1;
+                if($assigned){
+                    continue;
+                }
+                if(!in_array($day->day, $blocked_days) && !in_array($day->day, $guards) && !in_array($day_after, $guards) && !in_array($day_prev, $guards))
+                {
+                    $day->id_ref = $user->id;
+                    $day->ref_name = $user->name;
+                    $guards[] = $day->day;
+                    $day->save();
+                    $assigned = true;
+                }
+            }
+            if($assigned){
+                continue;
+            }
+
+            $assigned_emptys_weekend = [];
+            foreach($empty_days_weekend as $day)
+            { 
+                $day_prev = $day->day - 1;
+                $day_after = $day->day + 1;
+                if(!in_array($day->day, $blocked_days) && !in_array($day->day, $guards) && !in_array($day_after, $guards) && !in_array($day_prev, $guards))
+                {
+                    $day->id_ref = $user->id;
+                    $day->user_name = $user->name;
+                    $guards[] = $day->day;
+                    $day->save();
+                    $assigned = true;
+                    $assigned_emptys_weekend[] = $day;
+                }
+            }
+            foreach($assigned_emptys_weekend as $day)
+            {
+                $empty_days_weekendd = array_diff($empty_days_weekend, array($day));
+            }
+
+            $guards_assigned = json_decode($user->guards_assigned, true) ?? [];
+            $guards_assigned[$month->name] = $guards;
+            
+            $user->guards_assigned = json_encode($guards_assigned);
+            $user->save();
+        }
+
+        foreach($users as $user)
+        {
+            $user->aux_total_guards = null;
+            $user->save();
+        }
+
+        dd($empty_days, $empty_days_weekend, $users_flexibles, $days);
         // dd($days_a);
 
     }
