@@ -890,7 +890,6 @@ class MonthController extends Controller
             }
 
         }
-        // dd($users_disponibles, $users_disponibles_weekend);
         
         //primer hauriem de mirar els usuaris q no han completat les guardies
         foreach($users_disponibles_weekend as $user)
@@ -918,6 +917,12 @@ class MonthController extends Controller
                     $assigned = true;
                     $assigned_emptys_weekend[] = $day;
                     $users_disponibles = array_diff($users_disponibles, array($user));
+                    $empty_days_weekend = array_diff($empty_days_weekend, array($day));
+                    $guards_assigned = json_decode($user->guards_assigned, true) ?? [];
+                    $guards_assigned[$month->name] = $guards;
+                    
+                    $user->guards_assigned = json_encode($guards_assigned);
+                    $user->save();
                     break;
                 }
                 else if($day->id_guardTransplant === $user->id)
@@ -930,42 +935,106 @@ class MonthController extends Controller
                     $assigned = true;
                     $assigned_emptys_weekend[] = $day;
                     $users_disponibles = array_diff($users_disponibles, array($user)); //ELIMINEM DE USERS DISPONIBLES
+                    $empty_days_weekend = array_diff($empty_days_weekend, array($day));
                     break;
 
                 }
             }
-            foreach($assigned_emptys_weekend as $day)
+            // foreach($assigned_emptys_weekend as $day)
+            // {
+            //     $empty_days_weekend = array_diff($empty_days_weekend, array($day));
+            // }
+            
+            
+        }
+        // dd($users_disponibles, $users_disponibles_weekend);
+
+        
+        //SI QUEDEN DIES DE FINDE PER COMPLETAR, ELS COMPLETA EL GUARDIA TRANSPLANT
+        $month = Month::find($request->month);
+        $days = $month->days;
+        foreach($days as $day)
+        {
+            if($day->week_day === 6 || $day->week_day === 0)
             {
-                $empty_days_weekend = array_diff($empty_days_weekend, array($day));
+                if($day->id_ref === null)
+                {
+                    $day->id_ref = $day->id_guardTransplant;
+                    $refloc = "(REF+LOC)";
+                    $day->ref_name = $day->name_guardTransplant . $refloc;
+                    $day->save();
+                }
             }
+        }
+        
+
+        // dd($empty_days_weekend, $assigned_emptys_weekend);
+
+        // omplim guardies entre setmana
+        foreach($users_disponibles as $user)
+        {
+            $blocked_days_json = json_decode($user->blocked_days);
+            if($blocked_days_json === null){
+                dd($user);
+            }
+            $blocked_days = $blocked_days_json->{$month->name};
+            $guards_json = json_decode($user->guards_assigned);
+            $guards = $guards_json->{$month->name};
+
+            $assigned = false;
+            $assigned_emptys = [];
+            foreach($empty_days as $day)
+            {
+                $day_prev = $day->day - 1;
+                $day_after = $day->day + 1;
+                if(!in_array($day->day, $blocked_days) && !in_array($day->day, $guards) && !in_array($day_after, $guards) && !in_array($day_prev, $guards))
+                {
+                    $day->id_ref = $user->id;
+                    $day->ref_name = $user->name;
+                    $guards[] = $day->day;
+                    $day->save();
+                    $assigned = true;
+                    $assigned_emptys[] = $day;
+                    $users_disponibles = array_diff($users_disponibles, array($user));
+                    $empty_days = array_diff($empty_days, array($day));
+                    break;
+                }
+            }
+            
             $guards_assigned = json_decode($user->guards_assigned, true) ?? [];
             $guards_assigned[$month->name] = $guards;
             
             $user->guards_assigned = json_encode($guards_assigned);
             $user->save();
-            
         }
-        
-        
-        //SI QUEDEN DIES DE FINDE PER COMPLETAR, ELS COMPLETA EL GUARDIA TRANSPLANT
-        if(count($empty_days_weekend) > 0)
+        // dd($users_disponibles, $empty_days, $assigned_emptys);
+
+        $month = Month::find($request->month);
+        $days = $month->days;
+        $days_emptys_restantes = []; //dies entre setmana que un resident està sol o no hi ha ningu fent guardia
+        foreach($days as $day)
         {
-            foreach($empty_days_weekend as $day)
+            if($day->week_day !== 6 && $day->week_day !== 0)
             {
-                $day->id_ref = $day->id_guardTransplant;
-                $refloc = "(REF+LOC)";
-                $day->ref_name = $day->name_guardTransplant . $refloc;
+                if($day->id_ref === null)
+                {
+                    if($day->user_id === null)
+                    {
+                        $days_emptys_restantes[] = $day;
+                    }
+                    else
+                    {
+                        $user_assigned_lonely = User::find($day->user_id);
+                        if($user_assigned_lonely->type !== 'Adjunto Junior' && $user_assigned_lonely->type !== 'Adjunto Senior')
+                        {
+                            // dd($user_assigned_lonely, $day);
+                            $days_emptys_restantes[] = $day;
+                        }
+
+                    }
+                }
             }
         }
-
-        dd($empty_days_weekend);
-
-        //FALTA OMPLIR GUARDIES ENTRE SETMANA --> BORRAR DE LA LLISTA ELS Q ASSIGNEM UN WEEKEND
-        foreach($users_disponibles as $user)
-        {
-
-        }
-
 
         foreach($users_flexibles as $user)
         {
@@ -978,47 +1047,23 @@ class MonthController extends Controller
             $guards = $guards_json->{$month->name};
             // dd($user);
             //VEURE SI POT FER LA GUARDIA AQUELL DIA
-            $assigned = false;
-            foreach($empty_days as $day)
+            foreach($days_emptys_restantes as $day)
             { 
                 $day_prev = $day->day - 1;
                 $day_after = $day->day + 1;
-                if($assigned){
-                    continue;
-                }
+                
                 if(!in_array($day->day, $blocked_days) && !in_array($day->day, $guards) && !in_array($day_after, $guards) && !in_array($day_prev, $guards))
                 {
-                    $day->id_ref = $user->id;
-                    $day->ref_name = $user->name;
-                    $guards[] = $day->day;
-                    $day->save();
-                    $assigned = true;
+                    if($day->id_guardTransplant !== $user->id)
+                    {
+                        $day->id_ref = $user->id;
+                        $day->ref_name = $user->name;
+                        $guards[] = $day->day;
+                        $day->save();
+                        break;
+                    }
                 }
             }
-            if($assigned){
-                continue;
-            }
-
-            $assigned_emptys_weekend = [];
-            foreach($empty_days_weekend as $day)
-            { 
-                $day_prev = $day->day - 1;
-                $day_after = $day->day + 1;
-                if(!in_array($day->day, $blocked_days) && !in_array($day->day, $guards) && !in_array($day_after, $guards) && !in_array($day_prev, $guards))
-                {
-                    $day->id_ref = $user->id;
-                    $day->user_name = $user->name;
-                    $guards[] = $day->day;
-                    $day->save();
-                    $assigned = true;
-                    $assigned_emptys_weekend[] = $day;
-                }
-            }
-            foreach($assigned_emptys_weekend as $day)
-            {
-                $empty_days_weekendd = array_diff($empty_days_weekend, array($day));
-            }
-
             $guards_assigned = json_decode($user->guards_assigned, true) ?? [];
             $guards_assigned[$month->name] = $guards;
             
@@ -1032,9 +1077,8 @@ class MonthController extends Controller
             $user->save();
         }
 
-        dd($empty_days, $empty_days_weekend, $users_flexibles, $days);
+        // dd($users_disponibles, $days);
         // dd($days_a);
-
     }
 
     
