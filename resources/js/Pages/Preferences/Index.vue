@@ -26,8 +26,17 @@
                         Bloquear días
                     </a>
                     <a :href="route('months.consult', month.id)" class="px-3 py-1 bg-blue-500 text-white rounded-md">
-                        Consultar mes
+                        Consulta mis bloqueos
                     </a>
+                    
+                    <a v-if="month.handled === 'ORGANIZED'"
+                    :href="route('months.see_guards', month.id)"
+                    class="px-3 py-1 bg-blue-500 text-white rounded-md">
+                        Ver calendario de guardias
+                    </a>
+                    <span v-else class="px-3 py-1 bg-gray-500 text-white rounded-md">
+                        Calendario aún no disponible
+                    </span>
                     <!-- <Link :href="route('months.edit', month.id)" class="px-3 py-1 bg-blue-500 text-white rounded-md">
                         Bloquear días
                     </Link>

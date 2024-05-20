@@ -139,8 +139,23 @@ class MonthController extends Controller
             $day->user_name = null;
             $day->save();
         }
+        $month->handled = null;
+        $month->save();
     }
 
+    public function error_organize($id){
+        $month = Month::findOrFail($id);
+        $user_ids = json_decode($month->users_no_blocked_days);
+        // dd($user_ids);
+        $users = [];
+        foreach($user_ids as $id){
+            $users[] = User::find($id);
+        }
+        return Inertia::render('Months/ErrorOrganize', [
+            'users' => $users,
+            'month' => $month,
+        ]);
+    }
 
 
 
@@ -155,6 +170,35 @@ class MonthController extends Controller
         //     $day->user_id = null;
         //     $day->save();
         // }
+
+        $users_no_days_blocked = [];
+        foreach($users as $user)
+        {
+            if($user->name === 'MCB')
+            {
+                continue;
+            }
+            $blocked_days_json = json_decode($user->blocked_days);
+            if(isset($blocked_days_json->{$month->name}))
+            {
+                $blocked_days = $blocked_days_json->{$month->name};
+            }else{
+
+                $users_no_days_blocked[] = $user->id;
+            }
+
+        
+            
+        }
+        // dd($users_no_days_blocked);
+        if(count($users_no_days_blocked) > 0)
+        {
+            $month->users_no_blocked_days = json_encode($users_no_days_blocked); // Convertir los IDs a JSON
+            $month->handled = "BLOCK_DAYS";
+            $month->save();
+            dd($month);
+            return;
+        }
         $residents4 = [];
         $residents3_2 = [];
         $residents1 = [];
@@ -1077,6 +1121,8 @@ class MonthController extends Controller
             $user->save();
         }
 
+        $month->handled = "ORGANIZED";
+        $month->save();
         // dd($users_disponibles, $days);
         // dd($days_a);
     }

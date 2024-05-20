@@ -64,7 +64,9 @@ Route::middleware([
     Route::get('/months/{id}/edit', [MonthController::class, 'edit'])->name('months.edit');
     Route::get('/months/{id}/consult', [MonthController::class, 'consult'])->name('months.consult');
     Route::get('/months/{id}/see_guards', [MonthController::class, 'see_guards'])->name('months.see_guards');
+    Route::get('/months/{id}/error_organize', [MonthController::class, 'error_organize'])->name('months.error_organize');
     Route::get('/months', [MonthController::class, 'index'])->name('months.index');
+    // Route::get('/months/error_organize', [MonthController::class, 'index'])->name('months.index');
     // Route::post('/users/updateBlockDays', [DayController::class, 'update'])->name('days.update');
     Route::post('/months/organize_guards', [MonthController::class, 'organize_guards'])->name('months.organize_guards');
     Route::post('/months/clean_guards', [MonthController::class, 'clean_guards'])->name('months.clean_guards');
