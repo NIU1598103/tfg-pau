@@ -4,13 +4,11 @@
     import { Inertia } from '@inertiajs/inertia';
     import {useForm} from '@inertiajs/inertia-vue3';
     import { Head } from '@inertiajs/vue3';
+    import html2pdf from 'html2pdf.js';
 
     const props = defineProps({
         month: Object,
-        days: Array,
         daysExtra: Array,
-        user: Object,
-        daysBlocked: Array,
         
     });
     const weeksInMonth = () => {
@@ -30,9 +28,16 @@
             return result + 1;
         };
 
-
-
-
+    const downloadPDF = () => {
+        const element = document.getElementById('pdf-content');
+        const options = {
+        margin: [0, 2, 0, 2], // [arriba, derecha, abajo, izquierda] en mm
+        filename: `calendario_${props.month.name}.pdf`,
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }
+        };
+        
+        html2pdf().from(element).set(options).save();
+    };
 </script>
 
 <template>
@@ -40,19 +45,19 @@
         <title>Consultar días</title> 
     </Head>
     <AppLayout>
-        <div class="flex justify-center h-screen bg-white">
+        <div class="flex justify-center h-screen bg-white"  id="pdf-content">
             <div>
             <h1 style="margin: 10px; font-size: 18px;"> Calendario de guardias para el mes <strong>{{ month.name }}</strong> </h1>
                 <table class="bg-gray-100" style="width: 100%;">
                     <thead>
                         <tr>
-                            <th>Lun</th>
-                            <th>Mar</th>
-                            <th>Mié</th>
-                            <th>Jue</th>
-                            <th>Vie</th>
-                            <th>Sáb</th>
-                            <th>Dom</th>
+                            <th>Lunes</th>
+                            <th>Martes</th>
+                            <th>Miércoles</th>
+                            <th>Jueves</th>
+                            <th>Viernes</th>
+                            <th>Sábado</th>
+                            <th>Domingo</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -84,6 +89,8 @@
                         </template>
                     </tbody>
                 </table>
+                <button @click="downloadPDF" class="mt-2 bg-blue-500 text-white py-2 px-4 rounded">Descargar PDF</button>
+
             </div>
         </div>
     </AppLayout>

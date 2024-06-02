@@ -110,12 +110,10 @@ class MonthController extends Controller
             $daysBlocked = [];
         }
         // dd($daysBlocked);
+        //dd($daysExtra);
         return Inertia::render('Months/SeeGuards', [
             'month' => $month,
-            'days' => $days,
             'daysExtra' => $daysExtra,
-            'user' => $user,
-            'daysBlocked' => $daysBlocked,
         ]);
     }
 
