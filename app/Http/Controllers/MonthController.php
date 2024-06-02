@@ -844,22 +844,27 @@ class MonthController extends Controller
                     }
                     else if(!in_array($day->day, $blocked_days) && !in_array($day->day, $guards) && $day->id_ref === null)
                     {
-                        $day->id_ref = $user->id;
-                        $day->ref_name = $user->name;
-                        $day->save();
-
-                        $new_blocked_days = [];
-                        $guards[] = $day->day;
-
-                        $total_guards -= 1;
-                        $weekend_guards -= 1;
-                        if($day->day !== 1){
-                            $new_blocked_days[] = $day->day-1;
+                        $user_assigned_this_day = User::find($day->user_id);
+                        if($user_assigned_this_day->type !== 'Adjunto Junior')
+                        {
+                            $day->id_ref = $user->id;
+                            $day->ref_name = $user->name;
+                            $day->save();
+    
+                            $new_blocked_days = [];
+                            $guards[] = $day->day;
+    
+                            $total_guards -= 1;
+                            $weekend_guards -= 1;
+                            if($day->day !== 1){
+                                $new_blocked_days[] = $day->day-1;
+                            }
+                            if($day->day !== count($days)){
+                                $new_blocked_days[] = $day->day+1;
+                            }
+                            $blocked_days = array_merge($blocked_days,$new_blocked_days);
+                            
                         }
-                        if($day->day !== count($days)){
-                            $new_blocked_days[] = $day->day+1;
-                        }
-                        $blocked_days = array_merge($blocked_days,$new_blocked_days);
                         
                     }
                 }
