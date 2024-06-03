@@ -12,6 +12,22 @@ use Illuminate\Support\Facades\Auth;
 
 class MonthController extends Controller
 {
+    public function create(Request $request)
+    {
+        // Verificar si el mes ya existe
+        $existingMonth = Month::where('name', $request->date)->first();
+        if ($existingMonth) {
+            return redirect()->back()->with('error', 'El mes ya existe');
+        }
+
+        // Crear el nuevo mes
+        Month::create([
+            'name' => $request->date,
+        ]);
+
+        // Redirigir de vuelta con un mensaje de éxito
+        return redirect()->back()->with('success', 'Nuevo mes creado con éxito');
+    }
     public function edit($id){
         $month = Month::findOrFail($id);
         $days = $month->days;

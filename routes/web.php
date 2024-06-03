@@ -41,14 +41,6 @@ Route::middleware([
     })->name('dashboard');
 
 
-    //crear aqui
-    Route::get('/posts', [PostController::class, 'index'])->name('posts.index');
-    Route::get('/posts/create', [PostController::class, 'create'])->name('posts.create');
-    Route::post('/posts', [PostController::class, 'store'])->name('posts.store');
-    Route::get('/posts/{post}/edit', [PostController::class, 'show'])->name('posts.show');
-    Route::post('/posts/update', [PostController::class, 'update'])->name('posts.update');
-    Route::get('/posts/{post}/delete', [PostController::class, 'destroy'])->name('posts.destroy');
-
     Route::get('/users', [UserController::class, 'index'])->name('users.index');
     Route::post('/users/update', [UserController::class, 'update'])->name('users.update');
     Route::post('/users/update_blocked_days', [UserController::class, 'update_blocked_days'])->name('users.update_blocked_days');
@@ -70,7 +62,8 @@ Route::middleware([
     // Route::post('/users/updateBlockDays', [DayController::class, 'update'])->name('days.update');
     Route::post('/months/organize_guards', [MonthController::class, 'organize_guards'])->name('months.organize_guards');
     Route::post('/months/clean_guards', [MonthController::class, 'clean_guards'])->name('months.clean_guards');
-    
+    Route::post('/months/create', [MonthController::class, 'create'])->name('months.create');
+
     Route::get('/weeks', [WeekController::class, 'index'])->name('weeks.index');
     Route::get('/weeks/{week}/edit', [WeekController::class, 'edit'])->name('weeks.edit');
     Route::post('/weeks/update_guard_transplant', [WeekController::class, 'update_guard_transplant'])->name('weeks.update_guard_transplant');

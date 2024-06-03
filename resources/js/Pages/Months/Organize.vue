@@ -6,8 +6,19 @@
     defineProps({
         users: Array,
         months: Array,
+        flash: Object
     });
 
+    const newMonthForm = useForm({
+        date: '', // Campo para la nueva fecha del mes en formato "yyyy-mm"
+    });
+    const handleCreateMonth = () => {
+    newMonthForm.post('/months/create', {
+        onSuccess: () => {
+            newMonthForm.reset();
+            },
+        });
+    };
     
     const handleOrganizeGuardiasClick = (monthId) => {
         // Aquí puedes colocar la lógica que deseas ejecutar cuando se haga clic en el botón
@@ -37,7 +48,35 @@
     <AppLayout>
         <div class="flex justify-center h-screen bg-white">
             <div>
-            <h1 class="text-base font-semibold leading-7 text-gray-900 mt-4 mb-2">Meses disponibles:</h1>
+                <!-- Mostrar mensajes flash -->
+                <div v-if="flash.success" class="mb-4 text-green-500">
+                    {{ flash.success }}
+                </div>
+                <div v-if="flash.error" class="mb-4 text-red-500">
+                    {{ flash.error }}
+                </div>
+                <div class="text-center">
+                    <!-- Formulario para crear un nuevo mes -->
+                    <form @submit.prevent="handleCreateMonth" class="mb-4 inline-block">
+                        <label for="date" class="block text-sm font-medium text-gray-700">Nuevo Mes (yyyy-mm):</label>
+                        <input
+                            v-model="newMonthForm.date"
+                            type="month"
+                            id="date"
+                            name="date"
+                            required
+                            class="mt-1 block px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                        />
+                        <button
+                            type="submit"
+                            class="mt-2 px-3 py-2 bg-green-500 text-white rounded-md"
+                        >
+                            Crear Nuevo Mes
+                        </button>
+                    </form>
+                </div>
+                <h1 class="text-base text-center font-semibold leading-7 text-gray-900 mt-4 mb-2">Meses disponibles:</h1>
+
                 <ul role="list" class="divide-y divide-gray-200 bg-gray-100 p-4">
                     <li v-for="month in months" :key="month.id" class="flex justify-between gap-x-6 py-5">
                     <div class="flex min-w-0 gap-x-4">
@@ -66,7 +105,7 @@
                   
                     </li>
                 </ul>
-                </div>
+            </div>
         </div>
     </AppLayout>
 </template>
