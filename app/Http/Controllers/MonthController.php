@@ -210,7 +210,7 @@ class MonthController extends Controller
             $month->users_no_blocked_days = json_encode($users_no_days_blocked); // Convertir los IDs a JSON
             $month->handled = "BLOCK_DAYS";
             $month->save();
-            dd($month);
+            // dd($month);
             return;
         }
         $residents4 = [];
@@ -306,7 +306,7 @@ class MonthController extends Controller
         {
             $blocked_days_json = json_decode($user->blocked_days);
             if($blocked_days_json === null){
-                dd($user);
+                //dd($user);
             }
             $blocked_days = $blocked_days_json->{$month->name};
             $total_guards = $user->total_guards;
@@ -737,7 +737,7 @@ class MonthController extends Controller
         {            
             $blocked_days_json = json_decode($user->blocked_days);
             if($blocked_days_json === null){
-                dd($user);
+                //dd($user);
             }
             $blocked_days = $blocked_days_json->{$month->name};
             $total_guards = $user->total_guards;
@@ -1038,7 +1038,7 @@ class MonthController extends Controller
         {
             $blocked_days_json = json_decode($user->blocked_days);
             if($blocked_days_json === null){
-                dd($user);
+                //dd($user);
             }
             $blocked_days = $blocked_days_json->{$month->name};
             $guards_json = json_decode($user->guards_assigned);
@@ -1103,7 +1103,7 @@ class MonthController extends Controller
         {
             $blocked_days_json = json_decode($user->blocked_days);
             if($blocked_days_json === null){
-                dd($user);
+                //dd($user);
             }
             $blocked_days = $blocked_days_json->{$month->name};
             $guards_json = json_decode($user->guards_assigned);
